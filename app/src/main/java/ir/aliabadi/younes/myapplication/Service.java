@@ -51,6 +51,8 @@ public class Service extends android.app.Service {
 	public int onStartCommand( Intent intent, int flags, int startId ) {
 
 		String i1 = intent.getExtras( ).getString( "img1" );
+		String title = intent.getExtras( ).getString( "title" );
+		String des = intent.getExtras( ).getString( "des" );
 
 
 		String image1 = getStringImage( i1 );
@@ -59,23 +61,38 @@ public class Service extends android.app.Service {
 		JSONObject Object = new JSONObject( );
 
 		try {
-			Object.put( "image1", image1 );
+			Object.put( "title", title );
+			Object.put( "image", image1 );
+			Object.put( "des", des );
+
 		} catch ( JSONException e ) {
 		}
-
-
 		JsonObjectRequest request = new JsonObjectRequest
-				( Request.Method.POST,"",Object,
+				( Request.Method.POST,"http://bojgol.ir/app_php/test.php",Object,
 						new Response.Listener< JSONObject >( ) {
 							@Override
 							public void onResponse( JSONObject response ) {
 
+								int responseStatus = 0;
+								try {
+									responseStatus = response.getInt( "response" );
+								} catch ( JSONException e ) {
+									e.printStackTrace( );
+								}
 
-								Toast.makeText( Service.this, "ارسال شد", Toast.LENGTH_LONG ).show( );
-								//	displayNotification( );
-								Vibrator v = ( Vibrator ) getSystemService( Context.VIBRATOR_SERVICE );
-								v.vibrate( 500 );
+								if ( responseStatus==1 ){
+										Toast.makeText( Service.this, "ارسال شد", Toast.LENGTH_LONG ).show( );
+										displayNotification();
+										Vibrator v = (Vibrator) getSystemService( Context.VIBRATOR_SERVICE);
+										v.vibrate(500);
+									}else {
+										Toast.makeText( Service.this, "ارسال نشد", Toast.LENGTH_LONG ).show( );
+										Vibrator v = (Vibrator) getSystemService( Context.VIBRATOR_SERVICE);
+										v.vibrate(500);
+									}
+
 								stopSelf();
+
 							}
 						},
 						new Response.ErrorListener( ) {
